@@ -112,10 +112,10 @@ def steering_servo(angle): # steering servo
     steering =  zero_value - half_range * angle/180 # angle goes from -180 to 180
     steering = np.clip(steering, min_servo_value, max_servo_value)
     pi.set_servo_pulsewidth(servo, steering)
-    timestr = time.strftime("%Y%m%d-%H%M%S")
+    #timestr = time.strftime("%Y%m%d-%H%M%S")
     #camera.capture('/media/pi/UUI/'+timestr+'str'+str(steering)+'.jpg')
     #print('steering', steering)
-    print('/media/pi/UUI/'+timestr+'str'+str(steering)+'.jpg')
+    #print('/media/pi/UUI/'+timestr+'str'+str(steering)+'.jpg')
 
 bd.rotation_segments = 180
 bd.color = 'red'

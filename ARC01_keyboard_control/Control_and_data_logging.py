@@ -11,9 +11,13 @@ from picamera.array import PiRGBArray
 from picamera import PiCamera
 from threading import Thread
 import numpy as np
+import cv2
+
+import glob, os, shutil
 
 
 class PiVideoStream:
+    ''' Class for thread handling the video stream'''
 
     def __init__(self, resolution=(1024, 768), framerate=20):
         self.camera = PiCamera()
@@ -46,6 +50,43 @@ class PiVideoStream:
 
     def stop(self):
         self.stopped = True
+
+class car_logging():
+    ''' Class for thread handling saving captures in SD card'''
+    
+    def __init__(self):
+        # So far only video and steering
+        self.steering_angle = 0.0
+        self.array = np.zeros((768, 1024, 3))
+        self.stopped = False
+        
+    def start(self):
+        # Starting its own thread
+        ts = Thread(target=self.save_array)
+        ts.daemon = True
+        ts.start()
+        #ts.join()
+        return self
+
+    def save_array(self):
+        global count
+        while True:
+            count +=1
+            #print(count)
+            #print(self.steering_angle)
+            timestr = time.strftime("%Y%m%d-%H%M%S")
+            cv2.imwrite(timestr+'Tick'+str(count)+'str'+str(self.steering_angle)+'.jpg',self.array)
+            #np.save(timestr+'Tick'+str(1)+'str'+str(self.steering_angle)+'.npy',self.array)
+            if self.stopped:
+                break
+
+    def update_logging(self, image, steering):
+        self.steering_angle = steering
+        self.array = image
+
+    def stop(self):
+        self.stopped = True
+        
         
 def start_stop():
     global toggle
@@ -58,8 +99,11 @@ def start_stop():
         thread_carlog.start()
         motor_speed_start(speed)
     else:
-        thread_stream.stop()
         stop()
+        bd.color = (255, 165, 0)#orange
+        thread_stream.stop()
+        thread_carlog.stop()
+        copy_and_images()
         bd.color = 'red'
         toggle = 1
 
@@ -71,7 +115,6 @@ def steering(pos):
     image = thread_stream.read()
     # save image matrix
     thread_carlog.update_logging(image, pos.angle)
-    
     
 def motor_speed_start(speed):
     speed = np.clip(speed, min_esc_value, max_esc_value)
@@ -94,43 +137,23 @@ def stop():
     stop_motor()
     stop_servo()
 
-class car_logging():
-    
-    def __init__(self):
-        # So far only video and steering
-        self.steering_angle = 0.0
-        self.array = np.zeros((768, 1024, 3))
-        
-    def start(self):
-        # Starting its own thread
-        ts = Thread(target=self.save_array)
-        ts.daemon = True
-        ts.start()
-        #ts.join()
-        return self
-
-    def save_array(self):
-        global count
-        while True:
-            count +=1
-            print(count)
-            print(self.steering_angle)
-            timestr = time.strftime("%Y%m%d-%H%M%S")
-            np.save(timestr+'Tick'+str(1)+'str'+str(self.steering_angle)+'.npy',self.array)
-
-    def update_logging(self, image, steering):
-        self.steering_angle = steering
-        self.array = image
-        
+def copy_and_images():
+    '''Copy captures and move them to an external drive'''
+    files = glob.iglob(os.path.join('/home/pi/Documents/ARCproject/ARC01_keyboard_control', "*.jpg"))
+    for file in files:
+        if os.path.isfile(file):
+            shutil.copy2(file, '/media/pi/UUI')
+            os.remove(file)
 
 
+#Initial parameters
 
 ESC = 4 # GPIO 4 (pin 7)
 servo = 17 # GPIO 17 (pin 11)
 bd = BlueDot()
 count = 0
 toggle = 1
-speed = 1515.0
+speed = 1570.0
 
 pi = pigpio.pi();
 pi.set_servo_pulsewidth(ESC, 0) 
