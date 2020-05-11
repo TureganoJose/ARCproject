@@ -58,6 +58,7 @@ class car_logging():
         # So far only video and steering
         self.steering_angle = 0.0
         self.array = np.zeros((768, 1024, 3))
+        self.steering_angle_old = -1000
         self.stopped = False
         
     def start(self):
@@ -71,12 +72,14 @@ class car_logging():
     def save_array(self):
         global count
         while True:
-            count +=1
             #print(count)
             #print(self.steering_angle)
-            timestr = time.strftime("%Y%m%d-%H%M%S")
-            cv2.imwrite(timestr+'Tick'+str(count)+'str'+str(self.steering_angle)+'.jpg',self.array)
-            #np.save(timestr+'Tick'+str(1)+'str'+str(self.steering_angle)+'.npy',self.array)
+            if abs(self.steering_angle - self.steering_angle_old)>0.001: # Instead of using events/lock
+                count +=1
+                timestr = time.strftime("%Y%m%d-%H%M%S")
+                cv2.imwrite(timestr+'Tick'+str(count)+'str'+str(self.steering_angle)+'.jpg',self.array)
+                #np.save(timestr+'Tick'+str(1)+'str'+str(self.steering_angle)+'.npy',self.array)
+                self.steering_angle_old = self.steering_angle
             if self.stopped:
                 break
 
