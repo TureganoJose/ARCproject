@@ -1,0 +1,15 @@
+# depslib dependency file v1.0
+1589277888 source:/home/pi/Documents/ARCproject/PS3_controller/PS3_controller/joystick.cpp
+	"joystick.h"
+	<sys/types.h>
+	<sys/stat.h>
+	<fcntl.h>
+	<iostream>
+	<string>
+	<sstream>
+	"unistd.h"
+
+1589277818 /home/pi/Documents/ARCproject/PS3_controller/PS3_controller/joystick.h
+	<string>
+	<iostream>
+

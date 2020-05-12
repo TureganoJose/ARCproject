@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="ARC02_PS3_js" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/ARC02_PS3_js" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+					<Add option="-fopenmp" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/ARC02_PS3_js" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-Wall" />
+					<Add option="-fopenmp" />
+					<Add directory="../../../../../../usr/local/include/opencv4" />
+				</Compiler>
+				<ResourceCompiler>
+					<Add option="-pthread" />
+					<Add option="-lpigpio" />
+					<Add option="-lrt" />
+				</ResourceCompiler>
+				<Linker>
+					<Add option="-s" />
+					<Add option="`pkg-config --libs --cflags opencv4`" />
+					<Add library="gomp" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+		</Compiler>
+		<Unit filename="joystick.cpp" />
+		<Unit filename="joystick.h" />
+		<Unit filename="main.cpp" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
