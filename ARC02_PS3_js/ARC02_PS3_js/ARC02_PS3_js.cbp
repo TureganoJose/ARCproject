@@ -36,6 +36,7 @@
 					<Add option="-s" />
 					<Add option="`pkg-config --libs --cflags opencv4`" />
 					<Add library="gomp" />
+					<Add library="pigpio" />
 				</Linker>
 			</Target>
 		</Build>

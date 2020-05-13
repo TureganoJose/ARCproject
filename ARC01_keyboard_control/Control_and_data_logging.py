@@ -107,6 +107,7 @@ def start_stop():
         thread_stream.stop()
         thread_carlog.stop()
         copy_and_images()
+        pi.stop()
         bd.color = 'red'
         toggle = 1
 
@@ -156,7 +157,7 @@ servo = 17 # GPIO 17 (pin 11)
 bd = BlueDot()
 count = 0
 toggle = 1
-speed = 1570.0
+speed = 1560.0
 
 pi = pigpio.pi();
 pi.set_servo_pulsewidth(ESC, 0) 

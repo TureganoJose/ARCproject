@@ -56,12 +56,12 @@ int main(int argc,char ** argv)
 
     // Show video
 //    imshow("Live",frame);
-    int key = cv::waitKey(20);
-    key = (key==255) ? -1 : key;
-    if (key>=0)
+//    int key = cv::waitKey(20);
+//    key = (key==255) ? -1 : key;
+//    if (key>=0)
+//      break;
+    if(icounter==500)
       break;
-      if(icounter==500)
-        break;
   }
   std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
   std::cout << "Time difference = " << std::chrono::duration_cast <std::chrono::milliseconds> (end - begin).count() << "[ms]" << std::endl;

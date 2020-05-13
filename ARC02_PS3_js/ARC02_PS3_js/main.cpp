@@ -17,9 +17,13 @@ int OMP_NUM_THREADS=4;
 
 // Raspberry Pi
 #include <pigpio.h>
+#include <algorithm>    // std::max std::min
+
 
 using namespace cv;
 using namespace std;
+
+
 
 int main(int argc, char* argv[])
 {
@@ -40,7 +44,7 @@ else
 
 
 // Create an instance of Joystick
-Joystick joystick("/dev/input/js1");
+Joystick joystick("/dev/input/js0");
 // Ensure that it was found and that we can use it
 if (!joystick.isFound())
 {
@@ -48,7 +52,7 @@ if (!joystick.isFound())
   return -1;
 }
 JoystickEvent event;
-
+bool exit_flag = false;
 
 // Initialise GPIO
 // https://raspberrypi.stackexchange.com/questions/56003/pigpio-servo-control
@@ -58,11 +62,29 @@ if (gpioInitialise() < 0)
     return 1;
 }
 
+int ESC_gpio = 4; // GPIO 4 (pin 7)
+int servo_gpio = 17; // GPIO 17 (pin 11)
+double max_servo_value = 1780; //Servo's max value
+double min_servo_value = 980;  //Servo's min value
+double max_esc_value = 2000; //ESC's max value
+double min_esc_value = 980;  //ESC's min value
+double zero_value;
+double half_range;
 
+zero_value = (max_servo_value + min_servo_value)/2;
+half_range = (max_servo_value - min_servo_value)/2;
+
+
+
+double steering = 0.0;
+double speed = 0.0;
+
+double speed_incr= 50.0;
+
+gpioServo(servo_gpio, steering);
+gpioServo(ESC_gpio, speed);
 
 Mat frame;
-
-
  // Begin of parallel region
  #pragma omp parallel sections default(shared) private(frame)
 {
@@ -73,7 +95,7 @@ Mat frame;
 
 
        // Cotnrolling joystick
-       while (true)
+       while (!exit_flag)
        {
          // Restrict rate
          usleep(1000);
@@ -82,14 +104,45 @@ Mat frame;
 
          if (joystick.sample(&event))
          {
+
+
            if (event.isButton())
            {
-             printf("Button %u is %s\n",
-               event.number,
-               event.value == 0 ? "up" : "down");
+            if(event.number==0 && event.value==1) // When pressing X in PS3 controller
+            {
+                printf("Bye! \n");
+                exit_flag = true;
+            }
+            else if(event.number==9 && event.value==1) // Press start
+            {
+                speed = 1500;
+            }
+            else if(event.number==13 && event.value==1) //Arrow up in controller
+            {
+                speed += speed_incr;
+                speed = max(speed,min_esc_value);
+                speed = min(speed,max_esc_value);
+                gpioServo(ESC_gpio, speed);
+            }
+            else if(event.number==14 && event.value==1) //Arrow down in controller
+            {
+                speed -= speed_incr;
+                speed = max(speed,min_esc_value);
+                speed = min(speed,max_esc_value);
+                gpioServo(ESC_gpio, speed);
+            }
+              printf("Button %u is %s\n",
+              event.number,
+              event.value == 0 ? "up" : "down");
            }
            else if (event.isAxis())
            {
+            if(event.number==3)
+            {
+                steering = zero_value + half_range * (event.value/32767.0);
+                //printf("controller %d steering %f division %f \n",event.value, steering,(event.value/32767.0));
+                gpioServo(servo_gpio, steering);
+            }
              printf("Axis %u is at position %d\n", event.number, event.value);
            }
          }
@@ -100,7 +153,7 @@ Mat frame;
    {
        int icounter = 0;
 
-       while(1) {
+       while(!exit_flag) {
          cap >> frame;
          if (frame.empty()) {
              printf("ERROR: Unable to grab from the camera \n");
@@ -148,17 +201,19 @@ Mat frame;
        }
    }
 
-
-
-
 }
 
-
+if(event.number==0 && event.value==1)
+{
+    gpioServo(ESC_gpio, 0.0);
+    gpioServo(servo_gpio, 0.0);
+    printf("Bye! \n");
+    //return 0;
+}
 
 gpioTerminate();
-
+return 0;
 //destroyAllWindows();
-cout << "bye!" <<endl;
 }
 
 
