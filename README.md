@@ -12,16 +12,16 @@ Control_and_data_logging.py: It starts 2 threads in parallel the main one. Threa
 PS3 controller instructions (for Raspberry pi 4):
 1. Download sixpair.c from http://pabr.org/sixlinux/sixlinux.en.html
 2. Compile it gcc -o sixpair sixpair.c -lusb
-3. Connect PS3 to RPi via USB and run './sixpair'
+3. Connect PS3 to RPi via USB and run ```./sixpair```
 4. Write down the bd_addr
-5. 'sudo bluetoothctl' 'agent on' 'scan on'
+5. ```sudo bluetoothctl``` ```agent on``` ```scan on```
 6. Press PS button
-7. 'connect bd_addr'
-8. 'trust bd_addr'
+7. ```connect bd_addr```
+8. ```trust bd_addr```
 
 Open MP for Linux:
-1. Check your compiler version 'gcc --version'. Anything above 4.2 is compatible I believe.
-2. Add the flag '-fopenmp' and link to gomp library when compiling
+1. Check your compiler version ```gcc --version```. Anything above 4.2 is compatible I believe.
+2. Add the flag ```-fopenmp``` and link to gomp library when compiling
 
 Lessons learned:
 - Got a clearer picture of motors and how they are controlled. For this project, it has been mostly through a ESC (Electronic Speed Controller driven by PWM, sue me I don't have a real-time machine, or the budget for it) but also created my own circuit on a breadbord with a L293D. 
