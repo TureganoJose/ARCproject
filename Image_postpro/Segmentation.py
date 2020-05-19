@@ -102,7 +102,7 @@ def unet_model(img_input):
 
     # This is the last layer of the model
     last = tf.keras.layers.Conv2DTranspose(
-        1, 3, strides=2,
+        2, 3, strides=2,
         padding='same')  #64x64 -> 128x128
 
     x = last(x)
@@ -112,7 +112,7 @@ def unet_model(img_input):
 
 def model_definition(img_input):
 
-    n_classes = 1
+    n_classes = 2
 
     conv1 = Conv2D(32, (3, 3), activation='relu', padding='same')(img_input)
     conv1 = Dropout(0.2)(conv1)
@@ -196,11 +196,29 @@ def model_definition(img_input):
 
     return out
 
-input_height = 128
-input_width = 128
+def display(display_list):
+    plt.figure(figsize=(15, 15))
+    title = ['True Mask', 'Predicted Mask']
+    plt.subplot(1, 2, 1)
+    plt.title(title[0])
+    plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[0]))
+    plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[1]), alpha=0.15)
+    plt.axis('off')
+
+    plt.subplot(1, 2, 2)
+    plt.title(title[1])
+    plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[0]))
+    plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[2][:, :, np.newaxis]), alpha=0.15)
+    plt.axis('off')
+
+    plt.show()
+
+
+input_height = 300
+input_width = 300
 learning_rate = 0.01
 batch_size = 5
-training_epochs = 20
+training_epochs = 60
 
 processed_images, processed_labels = pre_process_data("D://Training folder", input_height, input_width)
 
@@ -211,46 +229,43 @@ X_test = np.concatenate([arr[np.newaxis] for arr in X_test_list])/255.0
 y_train = np.concatenate([arr[np.newaxis] for arr in y_train_list])
 y_test = np.concatenate([arr[np.newaxis] for arr in y_test_list])
 
-#
-# plt.figure()
-# plt.imshow(X_train[10,:, :, :])
-# plt.imshow(y_train[10,:, :, :], alpha=0.2)
-
-
+# Simple model
 img_input = Input(shape=[input_height, input_width, 3])
-# model_output = model_definition(img_input)
+model_output = model_definition(img_input)
+model = keras.Model(inputs=img_input, outputs=model_output, name="simple_CNN")
 
-base_model = tf.keras.applications.MobileNetV2(input_shape=[input_height, input_width, 3], include_top=False)
-# Use the activations of these layers
-layer_names = [
-    'block_1_expand_relu',   # 64x64
-    'block_3_expand_relu',   # 32x32
-    'block_6_expand_relu',   # 16x16
-    'block_13_expand_relu',  # 8x8
-    'block_16_project',      # 4x4
-]
+# # img_input = Input(shape=[input_height, input_width, 3])
+# base_model = tf.keras.applications.MobileNetV2(input_shape=[input_height, input_width, 3], include_top=False)
+# # Use the activations of these layers
+# layer_names = [
+#     'block_1_expand_relu',   # 64x64
+#     'block_3_expand_relu',   # 32x32
+#     'block_6_expand_relu',   # 16x16
+#     'block_13_expand_relu',  # 8x8
+#     'block_16_project',      # 4x4
+# ]
+#
+# layers = [base_model.get_layer(name).output for name in layer_names]
+# down_stack = tf.keras.Model(inputs=base_model.input, outputs=layers)
+# down_stack.trainable = True
+# up_stack = [
+#     pix2pix.upsample(512, 3),  # 4x4 -> 8x8
+#     pix2pix.upsample(256, 3),  # 8x8 -> 16x16
+#     pix2pix.upsample(128, 3),  # 16x16 -> 32x32
+#     pix2pix.upsample(64, 3),   # 32x32 -> 64x64
+# ]
+#
+#
+# model = unet_model(img_input)
 
-layers = [base_model.get_layer(name).output for name in layer_names]
-down_stack = tf.keras.Model(inputs=base_model.input, outputs=layers)
-down_stack.trainable = True
-up_stack = [
-    pix2pix.upsample(512, 3),  # 4x4 -> 8x8
-    pix2pix.upsample(256, 3),  # 8x8 -> 16x16
-    pix2pix.upsample(128, 3),  # 16x16 -> 32x32
-    pix2pix.upsample(64, 3),   # 32x32 -> 64x64
-]
 
 
-model = unet_model(img_input)
-
-
-#model = keras.Model(inputs=img_input, outputs=model_output, name="simple_CNN" )
 #tf.keras.utils.plot_model(model, show_shapes=True)
 model.summary()
 
 model.compile(optimizer='adam',
-              loss= keras.losses.BinaryCrossentropy(from_logits=True), #loss=keras.losses.categorical_crossentropy,
-              metrics=['binary_accuracy'])  # ['accuracy']
+              loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), #loss=keras.losses.categorical_crossentropy,
+              metrics=['accuracy'])  # ['accuracy']
 
 history = model.fit(X_train, y_train,
           batch_size=batch_size,
@@ -260,7 +275,20 @@ history = model.fit(X_train, y_train,
 
 score = model.evaluate(X_test, y_test, verbose=0)
 
+model.save('simple_CNN_300x300.h5')
+
 y_pred = model.predict(X_test)
+for i in range( X_test.shape[0]):
+    image_list = []
+    image_list.append(X_test[i])
+    image_list.append(y_test[i])
+    image_list.append(np.argmax(y_pred[i], axis=-1))
+    display(image_list)
+
+
+# plt.figure()
+# plt.imshow(X_test[10])
+# plt.imshow(np.argmax(y_pred[10] ,axis=-1) , alpha=0.2)
 
 print("hola")
 
