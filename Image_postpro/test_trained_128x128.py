@@ -76,17 +76,23 @@ def augment_seg(img, seg):
 
     return image_aug, segmap_aug
 
+
 def display(display_list):
     plt.figure(figsize=(15, 7))
-    title = ['True Mask', 'Predicted Mask']
-    plt.subplot(1, 2, 1)
+    title = ['Original', 'Ground truth', 'Predicted Mask']
+    plt.subplot(1, 3, 1)
     plt.title(title[0])
+    plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[0]))
+    plt.axis('off')
+
+    plt.subplot(1, 3, 2)
+    plt.title(title[1])
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[0]))
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[1]), alpha=0.15)
     plt.axis('off')
 
-    plt.subplot(1, 2, 2)
-    plt.title(title[1])
+    plt.subplot(1, 3, 3)
+    plt.title(title[2])
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[0]))
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[2][:, :, np.newaxis]), alpha=0.15)
     plt.axis('off')
@@ -117,10 +123,11 @@ y_test = np.concatenate([arr[np.newaxis] for arr in y_test_list])
 score = model.evaluate(X_test, y_test, verbose=0)
 print("%s: %.2f%%" % (model.metrics_names[1], score[1]*100))
 
-y_pred = model.predict(X_test)
 for i in range( X_test.shape[0]):
+    y_pred = model.predict(X_test[i][np.newaxis])
+    y_pred = y_pred.reshape((200,200,2))
     image_list = []
     image_list.append(X_test[i])
     image_list.append(y_test[i])
-    image_list.append(np.argmax(y_pred[i], axis=-1))
+    image_list.append(np.argmax(y_pred, axis=-1))
     display(image_list)

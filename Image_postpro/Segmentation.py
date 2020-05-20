@@ -4,7 +4,6 @@
 # https://github.com/wkentaro/labelme/blob/master/README.md
 
 import glob, os
-from shutil import copyfile, rmtree
 import imgaug as ia
 import imgaug.augmenters as iaa
 from tensorflow import keras
@@ -17,19 +16,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
 
-# files = glob.iglob(os.path.join('D://Rotated_new_camera_position_test2', "*.json"))
-# for file in files:
-#     if os.path.isfile(file):
-#         #start_pos = file.find("\\2")
-#         start_pos = file.find("\\T")
-#         end_pos = file.find(".json")
-#         base_filename = file[start_pos+1:end_pos]
-#         base_folder = base_filename.replace(".","_")
-#         path = file[:start_pos]+"\\"
-#         os.system("labelme_json_to_dataset " + file) # create dataset
-#         os.rename( path + base_folder +"_json"+ "\\label.png" , path + base_folder + "_json\\" + base_filename + "_json.png" )
-#         copyfile( path + base_folder + "_json\\" + base_filename + "_json.png",  path + base_filename + "_json.png")
-#         rmtree( path + base_folder + "_json\\" )
+
 
 
 def pre_process_data(folder, input_height: int, input_width: int):
@@ -197,16 +184,21 @@ def model_definition(img_input):
     return out
 
 def display(display_list):
-    plt.figure(figsize=(15, 15))
-    title = ['True Mask', 'Predicted Mask']
-    plt.subplot(1, 2, 1)
+    plt.figure(figsize=(15, 7))
+    title = ['Original', 'Ground truth', 'Predicted Mask']
+    plt.subplot(1, 3, 1)
     plt.title(title[0])
+    plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[0]))
+    plt.axis('off')
+
+    plt.subplot(1, 3, 2)
+    plt.title(title[1])
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[0]))
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[1]), alpha=0.15)
     plt.axis('off')
 
-    plt.subplot(1, 2, 2)
-    plt.title(title[1])
+    plt.subplot(1, 3, 3)
+    plt.title(title[2])
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[0]))
     plt.imshow(tf.keras.preprocessing.image.array_to_img(display_list[2][:, :, np.newaxis]), alpha=0.15)
     plt.axis('off')
@@ -214,13 +206,13 @@ def display(display_list):
     plt.show()
 
 
-input_height = 300
-input_width = 300
+input_height = 200
+input_width = 200
 learning_rate = 0.01
 batch_size = 5
 training_epochs = 60
 
-processed_images, processed_labels = pre_process_data("D://Training folder", input_height, input_width)
+processed_images, processed_labels = pre_process_data("C://Workspaces//ARCproject//Image_postpro//Training folder", input_height, input_width)
 
 X_train_list, X_test_list, y_train_list, y_test_list = train_test_split(processed_images, processed_labels, test_size=0.2)
 
@@ -273,16 +265,17 @@ history = model.fit(X_train, y_train,
           verbose=1,
           validation_data=(X_test, y_test))
 
-score = model.evaluate(X_test, y_test, verbose=0)
+# score = model.evaluate(X_test, y_test, verbose=0)
 
-model.save('simple_CNN_300x300.h5')
+model.save('simple_CNN.h5')
 
-y_pred = model.predict(X_test)
 for i in range( X_test.shape[0]):
+    y_pred = model.predict(X_test[i][np.newaxis])
+    y_pred = y_pred.reshape((200,200,2))
     image_list = []
     image_list.append(X_test[i])
     image_list.append(y_test[i])
-    image_list.append(np.argmax(y_pred[i], axis=-1))
+    image_list.append(np.argmax(y_pred, axis=-1))
     display(image_list)
 
 

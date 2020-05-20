@@ -1,13 +1,35 @@
 import glob, os
 from PIL import Image
+from shutil import copyfile, rmtree, copy2
 
 
-files = glob.iglob(os.path.join('D://', "*.jpg"))
+# files = glob.iglob(os.path.join('D://Higher_cam_pos_Uni_Parks_3rd_test', "*.jpg"))
+# for file in files:
+#     if os.path.isfile(file):
+#         im = Image.open(file)
+#         #im.rotate(180).show()
+#         im.rotate(180).save("D://Rotated_Higher_cam_pos_Uni_Parks_3rd_test//"+file[38:], "JPEG", subsampling=0, quality=100)
+
+
+files = glob.iglob(os.path.join('D://Rotated_Higher_cam_pos_Uni_Parks_3rd_test', "*.json"))
 for file in files:
     if os.path.isfile(file):
-        im = Image.open(file)
-        #im.rotate(180).show()
-        im.rotate(180).save("D://Rotated//"+file[4:], "JPEG", subsampling=0, quality=100)
+        start_pos = file.find("\\2")
+        end_pos = file.find(".json")
+        base_filename = file[start_pos+1:end_pos]
+        copy2(file[:-4]+"jpg", "D://Training folder") # copies original picture to training folder
+        base_folder = base_filename.replace(".","_")
+        path = file[:start_pos]+"\\"
+        os.system("labelme_json_to_dataset " + file) # create dataset
+        # Renames label file created by labelme
+        os.rename( path + base_folder +"_json"+ "\\label.png" , path + base_folder + "_json\\" + base_filename + "_json.png" )
+        # Copy label files to the root folder
+        copyfile( path + base_folder + "_json\\" + base_filename + "_json.png",  path + base_filename + "_json.png")
+        # and removes the folder created by labelme
+        rmtree( path + base_folder + "_json\\" )
+        copy2(path + base_filename + "_json.png", "D://Training folder") # Copies png label file to training folder
+        copy2(file, "D://Training folder") # Copies json file to training folder
+
 
 # X_Data = []
 # Y_Data = []
