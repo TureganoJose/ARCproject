@@ -283,6 +283,6 @@ for i in range( X_test.shape[0]):
 # plt.imshow(X_test[10])
 # plt.imshow(np.argmax(y_pred[10] ,axis=-1) , alpha=0.2)
 
-print("hola")
+print("bye!")
 
 

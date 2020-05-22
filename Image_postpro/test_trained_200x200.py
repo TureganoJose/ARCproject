@@ -4,21 +4,17 @@
 # https://github.com/wkentaro/labelme/blob/master/README.md
 
 import glob, os
-from shutil import copyfile, rmtree
+from tensorflow.keras.layers import *
 import imgaug as ia
 import imgaug.augmenters as iaa
-from tensorflow import keras
-from tensorflow.keras.layers import Dense, Flatten, Conv2D, DepthwiseConv2D, MaxPool2D, Input, Dropout, UpSampling2D, concatenate
-from tensorflow.keras.layers import *
 import tensorflow as tf
-from tensorflow_core.examples.models.pix2pix import pix2pix
+from tensorflow.keras.models import load_model
 from sklearn.model_selection import train_test_split
 from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
+import cv2
 
-
-from tensorflow.keras.models import load_model
 
 
 
@@ -99,6 +95,30 @@ def display(display_list):
 
     plt.show()
 
+def convert_to_png(img, a):
+    #alpha and img must have the same dimenstons
+
+    fin_img = cv2.cvtColor(img, cv2.COLOR_BGR2RGBA)
+    fin_img = fin_img.astype(np.float32)
+    alpha = a
+    # plt.imshow(alpha)
+    # plt.title('alpha image')
+    # plt.show()
+    # plt.imshow(img)
+    # plt.title('original image')
+    # plt.show()
+    # plt.imshow(alpha)
+    # plt.title('fin alpha image')
+    # plt.show()
+    fin_img[:,:, 0] = img[:,:,0]/255.0
+    fin_img[:,:, 1] = img[:,:,1]/255.0
+    fin_img[:,:, 2] = img[:,:,2]/255.0
+    fin_img[:,:, 3] = 1-alpha*0.95
+    # plt.imshow(fin_img)
+    # plt.title('fin image')
+    # plt.show()
+    return fin_img
+
 
 
 
@@ -119,15 +139,34 @@ X_test = np.concatenate([arr[np.newaxis] for arr in X_test_list])/255.0
 y_train = np.concatenate([arr[np.newaxis] for arr in y_train_list])
 y_test = np.concatenate([arr[np.newaxis] for arr in y_test_list])
 
-score = model.evaluate(X_test, y_test, verbose=0)
-print("%s: %.2f%%" % (model.metrics_names[1], score[1]*100))
+# Loops through test images and plots them comparing original, its mask and predicted mask
+# for i in range( X_test.shape[0]):
+#     y_pred = model.predict(X_test[i][np.newaxis])
+#     y_pred = y_pred.reshape((200,200,2))
+#     image_list = []
+#     image_list.append(X_test[i])
+#     image_list.append(y_test[i])
+#     image_list.append(np.argmax(y_pred, axis=-1))
+#     display(image_list)
 
+# Plays video and runs segmentation
+cap = cv2.VideoCapture('D://Higher_cam_pos_Uni_Parks_3rd_test//flipped_testing_video_lowres.mp4')
+while(cap.isOpened()):
+    # Capture frame-by-frame
+    ret, frame = cap.read()
+    new_frame = cv2.resize(frame, (input_width, input_height))
+    input_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2RGB)/255.0
+    cv2.imshow('Resized', new_frame)
+    y_pred = model.predict(input_frame[np.newaxis])
+    y_pred = y_pred.reshape((200, 200, 2))
+    pred_mask = np.argmax(y_pred, axis=-1).reshape(200,200,1)* 255 # + np.zeros((input_width, input_height,3))
+    pred_mask = np.append(pred_mask, np.ones((input_width, input_height,1)) * 255, axis=2 )
+    pred_mask = np.append(pred_mask, np.ones((input_width, input_height, 1)) * 255, axis=2)
+    # pred_mask[:, :, 1] = 0
+    # pred_mask[:, :, 2] = 0
+    #pred_masked_frame = cv2.addWeighted(new_frame, 0.4, pred_mask.astype(np.uint8), 0.1, 0)
+    output = ((0.3 * new_frame) + (0.7 * pred_mask)).astype("uint8")
+    cv2.imshow('Mask', output)
+    # plt.imshow(rgba_final_img)
+    # plt.show()
 
-for i in range( X_test.shape[0]):
-    y_pred = model.predict(X_test[i][np.newaxis])
-    y_pred = y_pred.reshape((200,200,2))
-    image_list = []
-    image_list.append(X_test[i])
-    image_list.append(y_test[i])
-    image_list.append(np.argmax(y_pred, axis=-1))
-    display(image_list)
