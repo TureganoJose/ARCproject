@@ -159,14 +159,29 @@ while(cap.isOpened()):
     cv2.imshow('Resized', new_frame)
     y_pred = model.predict(input_frame[np.newaxis])
     y_pred = y_pred.reshape((200, 200, 2))
-    pred_mask = np.argmax(y_pred, axis=-1).reshape(200,200,1)* 255 # + np.zeros((input_width, input_height,3))
-    pred_mask = np.append(pred_mask, np.ones((input_width, input_height,1)) * 255, axis=2 )
-    pred_mask = np.append(pred_mask, np.ones((input_width, input_height, 1)) * 255, axis=2)
-    # pred_mask[:, :, 1] = 0
-    # pred_mask[:, :, 2] = 0
-    #pred_masked_frame = cv2.addWeighted(new_frame, 0.4, pred_mask.astype(np.uint8), 0.1, 0)
+    pred_mask = np.argmax(y_pred, axis=-1).reshape(200,200,1)
+
+    # Sum all the columns in the mask to find out where the horizon seen by the camera is
+    max_value = np.amax(np.sum(pred_mask[:, :, 0], axis=0))
+    # Find what columns contain that value. The relative position of this column to the central one is how much you need to steer
+    max_index = np.where(np.sum(pred_mask[:, :, 0], axis=0)==max_value)
+    mean_max_index = int(round(np.mean(max_index)))
+
+    pred_mask = np.append(pred_mask * 255 , np.ones((input_width, input_height,1)) * 0, axis=2 )
+    pred_mask = np.append(pred_mask, np.ones((input_width, input_height, 1)) * 0, axis=2)
+
+    # Central vertical black line as reference (in black)
+    pred_mask[25:175, 99, 0] = 255
+    pred_mask[25:175, 99, 1] = 255
+    pred_mask[25:175, 99, 2] = 255
+
+    # Plot the position of the pixel column with more path detected
+    pred_mask[10:190, mean_max_index, 0] = 0
+    pred_mask[10:190, mean_max_index, 1] = 255
+    pred_mask[10:190, mean_max_index, 2] = 0
+
     output = ((0.3 * new_frame) + (0.7 * pred_mask)).astype("uint8")
-    cv2.imshow('Mask', output)
-    # plt.imshow(rgba_final_img)
-    # plt.show()
+    # cv2.imshow('Mask', output)
+    plt.imshow(output)
+    plt.show()
 
