@@ -37,7 +37,7 @@ def pre_process_data(folder, input_height: int, input_width: int):
 
         else:
             # Resize inputs and outputs
-            resized_in = np.asarray(Image.open(file).resize((input_width, input_height)))
+            resized_in = np.asarray(Image.open(file).resize((input_width, input_height )))
             resized_out = np.asarray(Image.open(label_file).resize((input_width, input_height)))
             resized_out = resized_out[:,:,np.newaxis]
 
@@ -206,11 +206,11 @@ def display(display_list):
     plt.show()
 
 
-input_height = 200
-input_width = 200
+input_height = 400
+input_width = 400
 learning_rate = 0.01
-batch_size = 5
-training_epochs = 60
+batch_size = 2
+training_epochs = 100
 
 processed_images, processed_labels = pre_process_data("C://Workspaces//ARCproject//Image_postpro//Training folder", input_height, input_width)
 
@@ -226,8 +226,9 @@ img_input = Input(shape=[input_height, input_width, 3])
 model_output = model_definition(img_input)
 model = keras.Model(inputs=img_input, outputs=model_output, name="simple_CNN")
 
-# # img_input = Input(shape=[input_height, input_width, 3])
-# base_model = tf.keras.applications.MobileNetV2(input_shape=[input_height, input_width, 3], include_top=False)
+# # Unet
+# img_input = Input(shape=[input_width, input_height, 3])
+# base_model = tf.keras.applications.MobileNetV2(input_shape=[input_width, input_height, 3], include_top=False)
 # # Use the activations of these layers
 # layer_names = [
 #     'block_1_expand_relu',   # 64x64
@@ -271,7 +272,7 @@ model.save('simple_CNN.h5')
 
 for i in range( X_test.shape[0]):
     y_pred = model.predict(X_test[i][np.newaxis])
-    y_pred = y_pred.reshape((200,200,2))
+    y_pred = y_pred.reshape((input_width, input_height, 2))
     image_list = []
     image_list.append(X_test[i])
     image_list.append(y_test[i])
