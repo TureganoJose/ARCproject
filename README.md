@@ -2,6 +2,19 @@
 ## ARC01 is a cheap RC with a couple of brushed motors to control steering and acceleration.
 ## ARC02 is based around FTX Vantage chassis platform. It's got a brushed motor and a 3kg servo.
 
+
+
+#The project has 5 distinctive parts:
+## 1. Prototyping the car
+The project started with **ARC01**, a cheap RC with a couple of brushed motors to control steering and acceleration. It highlighted the limitations of the raspberry pi when it comes to controls  and computational power. 
+## 2. Hardware
+## 3. Controls and software
+## 4. Collecting data and labelling
+## 5. Training models
+## 6. Embedded software
+
+
+
 camera_test.py: Contains capturing and saving data benchmarks
 
 bluedot_test.py: Testing the bluedot API. Bluedot is an android app which connects with RPi via Bluetooth and sends the position of your finger placed on a bluedot on the screen. Bluedot also recognises some basic interactions like double-tap and swipe 
@@ -22,6 +35,8 @@ PS3 controller instructions (for Raspberry pi 4):
 Open MP for Linux:
 1. Check your compiler version ```gcc --version```. Anything above 4.2 is compatible I believe.
 2. Add the flag ```-fopenmp``` and link to gomp library when compiling
+
+
 
 Lessons learned:
 - Got a clearer picture of motors and how they are controlled. For this project, it has been mostly through a ESC (Electronic Speed Controller driven by PWM, sue me I don't have a real-time machine, or the budget for it) but also created my own circuit on a breadbord with a L293D. 
