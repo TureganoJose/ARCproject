@@ -1,7 +1,7 @@
 # Sandbox for Autonomous Radio Controlled project
 
 
-#The project has 5 distinctive parts:
+The project has 5 distinctive parts:
 ## 1. Prototyping the car
 The project started with **ARC01**, a cheap RC with a couple of brushed motors to control steering and acceleration. It highlighted the limitations of the Raspberry pi when it comes to controls  and computational power. 
 ![ARC01 Bread board](Pictures/ARC01_testing.gif)
@@ -30,6 +30,7 @@ Labelme (https://github.com/wkentaro/labelme/blob/master/README.md) was used to 
 Two different approaches:
 1. Dave-2 end-to-end driving. Everytime a picture was taken, the steering angle applied was logged. Then images (+ augmentation) was fed into the network along with the steering angles. The network then replicates the driving.
 Although impressive there is nothing innovative here, it's been done by many people See architecture below, it contains 250 thousand parameters.
+
 ![Dave 2 Net](Pictures/Dave_2.png)
 2. Using semantic segmentation to detect the road/path and then steer the car accordingly, trying to keep the centerline of the vehicle aligned with the horizon.
 
@@ -38,7 +39,9 @@ The raw pictures were resized to match the netwowrk and augmented with cropping,
 
 
 3 different models were tested for the segmentation approach. 
-1. Vainilla Segmentation as specified in https://divamgupta.com/image-segmentation/2019/06/06/deep-learning-semantic-segmentation-keras.html. Only 400K parameters. Very simple and decent enough results but good enough. Struggling a lot with some shadows, sky, rocks and sunshine.
+1. Vainilla Segmentation as specified in https://divamgupta.com/image-segmentation/2019/06/06/deep-learning-semantic-segmentation-keras.html. Only 400K parameters. Very simple and decent enough results but struggling a lot with some shadows, sky, rocks and sunshine.
+
+
 ![Simple net for Segmentation](Pictures/Simple_Segmentation.png)
 2. Unet: typical example of segmentation in medicine to detect cancer but too many parameters (almost 8 million).
 ![Unet](Pictures/Unet.png)
