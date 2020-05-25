@@ -16,9 +16,6 @@ import numpy as np
 import cv2
 
 
-
-
-
 def pre_process_data(folder, input_height: int, input_width: int):
     input_files = glob.iglob(os.path.join(folder, "*.jpg"))
 
@@ -37,7 +34,7 @@ def pre_process_data(folder, input_height: int, input_width: int):
 
         else:
             # Resize inputs and outputs
-            resized_in = np.asarray(Image.open(file).resize((input_width, input_height)))
+            resized_in = np.asarray(Image.open(file).resize((input_width, input_height )))
             resized_out = np.asarray(Image.open(label_file).resize((input_width, input_height)))
             resized_out = resized_out[:,:,np.newaxis]
 
@@ -123,13 +120,13 @@ def convert_to_png(img, a):
 
 
 # load model
-model = load_model('simple_CNN.h5')
+model = load_model('HairMatteNet.h5')
 
 # summarize model.
 # model.summary()
 # load dataset
-input_height = 200
-input_width = 200
+input_height = 224
+input_width = 224
 processed_images, processed_labels = pre_process_data("C://Workspaces//ARCproject//Image_postpro//Training folder", input_height, input_width)
 
 X_train_list, X_test_list, y_train_list, y_test_list = train_test_split(processed_images, processed_labels, test_size=0.2)
@@ -158,8 +155,8 @@ while(cap.isOpened()):
     input_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2RGB)/255.0
     cv2.imshow('Resized', new_frame)
     y_pred = model.predict(input_frame[np.newaxis])
-    y_pred = y_pred.reshape((200, 200, 2))
-    pred_mask = np.argmax(y_pred, axis=-1).reshape(200,200,1)
+    y_pred = y_pred.reshape((input_height, input_width,  2))
+    pred_mask = np.argmax(y_pred, axis=-1).reshape(input_height, input_width, 1)
 
     # Sum all the columns in the mask to find out where the horizon seen by the camera is
     max_value = np.amax(np.sum(pred_mask[:, :, 0], axis=0))
@@ -171,16 +168,16 @@ while(cap.isOpened()):
     pred_mask = np.append(pred_mask, np.ones((input_width, input_height, 1)) * 0, axis=2)
 
     # Central vertical black line as reference (in black)
-    pred_mask[25:175, 99, 0] = 255
-    pred_mask[25:175, 99, 1] = 255
-    pred_mask[25:175, 99, 2] = 255
+    pred_mask[int(0.25*input_height):int(0.75*input_height), int(input_width/2), 0] = 255
+    pred_mask[int(0.25*input_height):int(0.75*input_height), int(input_width/2), 1] = 255
+    pred_mask[int(0.25*input_height):int(0.75*input_height), int(input_width/2), 2] = 255
 
     # Plot the position of the pixel column with more path detected
-    pred_mask[10:190, mean_max_index, 0] = 0
-    pred_mask[10:190, mean_max_index, 1] = 255
-    pred_mask[10:190, mean_max_index, 2] = 0
+    pred_mask[int(0.1*input_height):int(0.9*input_height), mean_max_index, 0] = 0
+    pred_mask[int(0.1*input_height):int(0.9*input_height), mean_max_index, 1] = 255
+    pred_mask[int(0.1*input_height):int(0.9*input_height), mean_max_index, 2] = 0
 
-    output = ((0.3 * new_frame) + (0.7 * pred_mask)).astype("uint8")
+    output = ((0.6 * new_frame) + (0.4 * pred_mask)).astype("uint8")
     # cv2.imshow('Mask', output)
     plt.imshow(output)
     plt.show()
