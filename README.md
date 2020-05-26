@@ -3,13 +3,27 @@
 
 The project has 5 distinctive parts:
 ## 1. Prototyping the car
-The project started with **ARC01**, a cheap RC with a couple of brushed motors to control steering and acceleration. It highlighted the limitations of the Raspberry pi when it comes to controls  and computational power. 
+The project started with **ARC01**, a cheap RC with a couple of brushed motors to control steering and acceleration. It highlighted the limitations of the Raspberry pi when it comes to controls  and computational power.
+Once I've learned how to control motors with PWM (changing the duty cycle) and I tested that the RPi 4 is good enough to create the software-generated PWM (alternatively I'd need an Arduino which is the proper way), we can actually invest a bit more on a decent RC car. 
+ 
 ![ARC01 Bread board](Pictures/ARC01_testing.gif)
 
 ## 2. Hardware
-The final hardware was based around FTX Vantage chassis platform named **ARC02**. It's got a brushed motor and a 3kg servo, both controlled with PWM through an electronic speed control (ESC). A Raspberry Pi 4 does all the computing. Benchmark suggest its computational power is similar to a low end mobile in 2019 so the neural networks will be designed accordingly.
+The final hardware was based around FTX Vantage chassis platform (**ARC02**). It's got a brushed motor and a 3kg servo, both controlled with PWM through an electronic speed control (ESC). A Raspberry Pi 4 does all the computing. Benchmark suggest its computational power is similar to a low end mobile in 2019 so the neural networks will be designed accordingly.
 A chinese replica of Pi Camera v2 was used with very decent results.
 Apart from the car, some of the coding and neural network training happened in an old i5-6300HQ (2.3GHz) laptop with a GeForce GTX 960M.
+This is the wiring:
+
+![ARC02 Wiring](Pictures/ARC02_wiring_scheme.png)
+
+Some close-ups of the wire installation.
+
+![ARC02 Wiring 1](Pictures/ARC02_RPi_pos.jpg)
+![ARC02 Wiring 2](Pictures/ARC02_wiring.jpg)
+![ARC02 Wiring 3](Pictures/ARC02_wiring2.jpg)
+
+Note that the receiver feeds the servo hence the red cables go into the receiver.
+
 
 ## 3. Controls and software
 This was a rather interesting phase of the project. I implemented two different ways of controlling the car:
@@ -17,6 +31,13 @@ This was a rather interesting phase of the project. I implemented two different 
 ![Blue dot app](Pictures/bluedotandroid_small.png)
 2. PS3 controller, a lot functionality. See picture below.
 ![PS3 controls, Oxford](Pictures/PS3.png)
+
+Software was developed in different environments (Ubuntu, Windows 10 and Raspbian). Prototyping was done in Python. All the embedded code for the car is C++. 
+Keras with Tensorflow backend to explore differents network architectures. OpenCV (C++ and Python) and Pillow for dealing with images/video. 
+Python 3.7
+
+gcc version 8.30
+
 
 
 ## 4. Collecting data and labelling
@@ -43,10 +64,14 @@ The raw pictures were resized to match the netwowrk and augmented with cropping,
 
 
 ![Simple net for Segmentation](Pictures/Simple_Segmentation.png)
+
+
 2. Unet: typical example of segmentation in medicine to detect cancer but too many parameters (almost 8 million).
 ![Unet](Pictures/Unet.png)
+
+
 3. HairMatteNet (https://arxiv.org/pdf/1712.07168.pdf): As the name indicates, originally used to detect hairline. Lightweight segmentation based on MobileNet with a custom decoder (some skip connections and simplified reverse MobileNet). Best results so far, it contains around 4 million parameters but it doesn't mistake benches, sky and sun reflections as the park path. Only 3.8 million
-![Simple Segmentation](Pictures/HairMatteNet.png)
+![Simple Segmentation](Pictures/HairMatteNet.PNG)
 
 
 Below there are some examples of challenging segmentation with dry patches on the grass, shoes, shadows and reflections. 
@@ -83,6 +108,7 @@ Lessons learned:
 
 Notes:
 - The code has been developed in different platforms, mostly Ubuntu, Raspbian and Windows 10. Apologies if folders don't work well.
+- The tutorials in qengineering.eu are very useful (ie: https://qengineering.eu/install-tensorflow-2-lite-on-raspberry-pi-4.html, although I figuered out how to soft link flatbuffers by myself)
 
 PS3 controller instructions (for Raspberry pi 4):
 1. Download sixpair.c from http://pabr.org/sixlinux/sixlinux.en.html

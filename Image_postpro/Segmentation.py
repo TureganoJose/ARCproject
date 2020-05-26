@@ -82,7 +82,12 @@ history = model.fit(X_train, y_train,
           validation_data=(X_test, y_test))
 
 # Save model
-# model.save('HairMatteNet.h5')
+# model.save('HairMatteNet.h5') # Saved in Keras
+
+# Convert the model to tensorflow lite.
+converter = tf.lite.TFLiteConverter.from_keras_model(model)
+tflite_model = converter.convert()
+open( 'tflite_HairMatteNet.tflite' , 'wb' ).write( tflite_model )
 
 # Display results
 for i in range( X_test.shape[0]):
