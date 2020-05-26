@@ -1,6 +1,5 @@
 from bluedot import BlueDot
 from signal import pause
-import os
 import time
 import numpy as np
 os.system ("sudo pigpiod") #Launching GPIO library
@@ -76,7 +75,7 @@ class car_logging():
             #print(self.steering_angle)
             if abs(self.steering_angle - self.steering_angle_old)>0.001: # Instead of using events/lock
                 count +=1
-                timestr = time.strftime("%Y%m%d-%H%M%S")
+                timestr = time.strftime("%Y%m%d_%H%M%S")
                 cv2.imwrite(timestr+'Tick'+str(count)+'str'+str(self.steering_angle)+'.jpg',self.array)
                 #np.save(timestr+'Tick'+str(1)+'str'+str(self.steering_angle)+'.npy',self.array)
                 self.steering_angle_old = self.steering_angle
