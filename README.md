@@ -70,8 +70,8 @@ The raw pictures were resized to match the netwowrk and augmented with cropping,
 ![Unet](Pictures/Unet.png)
 
 
-3. HairMatteNet (https://arxiv.org/pdf/1712.07168.pdf): As the name indicates, originally used to detect hairline. Lightweight segmentation based on MobileNet with a custom decoder (some skip connections and simplified reverse MobileNet). Best results so far, it contains around 4 million parameters but it doesn't mistake benches, sky and sun reflections as the park path. Only 3.8 million
-![Simple Segmentation](Pictures/HairMatteNet.PNG)
+3. HairMatteNet (https://arxiv.org/pdf/1712.07168.pdf): As the name indicates, originally used to detect hairline. Lightweight segmentation based on MobileNet with a custom decoder (some skip connections and simplified reverse MobileNet). Best results so far, it contains around 3.8 million parameters but it doesn't mistake benches, sky and sun reflections as the park path. Only 3.8 million
+![Simple Segmentation](Pictures/HairMatteNet.png)
 
 
 Below there are some examples of challenging segmentation with dry patches on the grass, shoes, shadows and reflections. 
