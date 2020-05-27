@@ -86,7 +86,7 @@ history = model.fit(X_train, y_train,
 
 # Convert the model to tensorflow lite.
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
-tflite_model = converter.convert()
+tflite_reduced_model = converter.convert()
 open( 'tflite_HairMatteNet.tflite' , 'wb' ).write( tflite_model )
 
 # Display results

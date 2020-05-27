@@ -131,6 +131,7 @@ def model_HairMatteNet(img_input):
     out = Softmax(axis=-1)(x)
     return out
 
+
 def model_simple_segmentation(img_input):
 
     n_classes = 2

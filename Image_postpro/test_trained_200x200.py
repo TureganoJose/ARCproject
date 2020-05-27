@@ -14,6 +14,7 @@ from PIL import Image
 import matplotlib.pyplot as plt
 import numpy as np
 import cv2
+import time
 
 
 def pre_process_data(folder, input_height: int, input_width: int):
@@ -148,6 +149,15 @@ y_test = np.concatenate([arr[np.newaxis] for arr in y_test_list])
 
 # Plays video and runs segmentation
 cap = cv2.VideoCapture('D://Higher_cam_pos_Uni_Parks_3rd_test//flipped_testing_video_lowres.mp4')
+
+# Comparison with tensorflow lite done with a image rather than video
+# frame = cv2.imread("C://Workspaces\ARCproject//Image_postpro//Training folder//20200513-141759Tick82str-16.186993573536025.jpg")
+# start_time = time.time()
+# new_frame = cv2.resize(frame, (input_width, input_height))
+# input_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2RGB) / 255.0
+# y_pred = model.predict(input_frame[np.newaxis])
+# print("--- %s seconds ---" % (time.time() - start_time))
+
 while(cap.isOpened()):
     # Capture frame-by-frame
     ret, frame = cap.read()
