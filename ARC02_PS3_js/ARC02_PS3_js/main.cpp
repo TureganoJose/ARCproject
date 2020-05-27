@@ -37,14 +37,15 @@ if (!cap.isOpened()) {
 }
 else
 {
-    cap.set(CAP_PROP_FRAME_WIDTH,1024);
-    cap.set(CAP_PROP_FRAME_HEIGHT,768);
+    cap.set(CAP_PROP_FRAME_WIDTH,1024); // 1024  640
+    cap.set(CAP_PROP_FRAME_HEIGHT,768); // 768   480
     printf("Camera is open \n");
 }
 
+VideoWriter video("testing_video_lowres.mkv",VideoWriter::fourcc('H','2','6','4'),10, Size(1024, 768));
 
 // Create an instance of Joystick
-Joystick joystick("/dev/input/js0");
+Joystick joystick("/dev/input/js1");
 // Ensure that it was found and that we can use it
 if (!joystick.isFound())
 {
@@ -67,7 +68,7 @@ int servo_gpio = 17; // GPIO 17 (pin 11)
 double max_servo_value = 1780; //Servo's max value
 double min_servo_value = 980;  //Servo's min value
 double max_esc_value = 2000; //ESC's max value
-double min_esc_value = 980;  //ESC's min value
+double min_esc_value = 1500;  //ESC's min value
 double zero_value;
 double half_range;
 
@@ -79,7 +80,7 @@ half_range = (max_servo_value - min_servo_value)/2;
 double steering = 0.0;
 double speed = 0.0;
 
-double speed_incr= 50.0;
+double speed_incr= 10.0;
 
 gpioServo(servo_gpio, steering);
 gpioServo(ESC_gpio, speed);
@@ -131,19 +132,19 @@ Mat frame;
                 speed = min(speed,max_esc_value);
                 gpioServo(ESC_gpio, speed);
             }
-              printf("Button %u is %s\n",
-              event.number,
-              event.value == 0 ? "up" : "down");
+              //printf("Button %u is %s\n",
+              //event.number,
+              //event.value == 0 ? "up" : "down");
            }
            else if (event.isAxis())
            {
             if(event.number==3)
             {
-                steering = zero_value + half_range * (event.value/32767.0);
+                steering = zero_value - half_range * (event.value/32767.0);
                 //printf("controller %d steering %f division %f \n",event.value, steering,(event.value/32767.0));
                 gpioServo(servo_gpio, steering);
             }
-             printf("Axis %u is at position %d\n", event.number, event.value);
+             //printf("Axis %u is at position %d\n", event.number, event.value);
            }
          }
        }
@@ -168,13 +169,18 @@ Mat frame;
              struct tm * timeinfo;
              char buffer[80];
 
-             time (&rawtime);
-             timeinfo = localtime(&rawtime);
-             strftime(buffer,sizeof(buffer),"%d-%m-%Y %H:%M:%S",timeinfo);
-             std::string ctr_str = std::to_string(icounter);
-             std::string date_str(buffer);
-             std::string steering_str = std::to_string(event.value);
-             result = imwrite("Tick"+ctr_str+"Data"+date_str+"str"+steering_str+".jpg", frame);
+             //time (&rawtime);
+             //timeinfo = localtime(&rawtime);
+             //strftime(buffer,sizeof(buffer),"%Y%m%d_%H%M%S",timeinfo);
+             //std::string ctr_str = std::to_string(icounter);
+             //std::string date_str(buffer);
+             //std::string steering_str = std::to_string(steering);
+             //result = imwrite(date_str+"Tick"+ctr_str+"str"+steering_str+".jpg", frame);
+
+               // writes video
+               video.write(frame);
+               result = 1;
+
          }
          catch (const cv::Exception& ex)
          {
@@ -189,15 +195,6 @@ Mat frame;
          {
              printf("ERROR: Can't save JPG file.\n");
          }
-
-
-           if(icounter==500)
-           {
-             break;
-             cout << "Closing the camera" << endl;
-             cap.release();
-
-            }
        }
    }
 
@@ -207,6 +204,8 @@ if(event.number==0 && event.value==1)
 {
     gpioServo(ESC_gpio, 0.0);
     gpioServo(servo_gpio, 0.0);
+    cap.release();
+    video.release();
     printf("Bye! \n");
     //return 0;
 }
