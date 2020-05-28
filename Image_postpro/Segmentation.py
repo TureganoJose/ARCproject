@@ -5,7 +5,7 @@ from tensorflow_core.examples.models.pix2pix import pix2pix
 from sklearn.model_selection import train_test_split
 import numpy as np
 from Segementation_utils import pre_process_data, display
-from Segmentation_models import model_HairMatteNet, model_simple_segmentation
+from Segmentation_models import model_HairMatteNet, model_simple_segmentation, model_Tiramisu, model_FCN8, model_simple_segmentation_v2, C_FCN_model, C_UNETplusplus_model
 import os.path
 
 # Inputs
@@ -13,7 +13,7 @@ input_height = 224
 input_width = 224
 learning_rate = 0.01
 batch_size = 5
-training_epochs = 30
+training_epochs = 60
 
 my_path = os.path.abspath(os.path.dirname(__file__))
 training_path = os.path.join(my_path, "Training folder")
@@ -38,9 +38,35 @@ y_test = np.concatenate([arr[np.newaxis] for arr in y_test_list])
 # model = keras.Model(inputs=img_input, outputs=model_output, name="simple_CNN")
 
 # # HairMatteNet
+# img_input = Input(shape=[input_height, input_width, 3])
+# model_output = model_HairMatteNet(img_input)
+# model = keras.Model(inputs=img_input, outputs=model_output, name="HairMatteNet")
+
+
+# Tiramisu
+# img_input = Input(shape=[input_height, input_width, 3])
+# model_output = model_Tiramisu(img_input)
+# model = keras.Model(inputs=img_input, outputs=model_output, name="Tiramisu")
+
+# FCN8 (too many parameters for Rpi 4)
+# img_input = Input(shape=[input_height, input_width, 3])
+# model_output = model_FCN8(img_input)
+# model = keras.Model(inputs=img_input, outputs=model_output, name="FCN8")
+
+# model_simple_segmentation_v2
+# img_input = Input(shape=[input_height, input_width, 3])
+# model_output = model_simple_segmentation_v2(img_input)
+# model = keras.Model(inputs=img_input, outputs=model_output, name="model_simple_segmentation_v2")
+
+# C_FCN
+# img_input = Input(shape=[input_height, input_width, 3])
+# model_output = C_FCN_model(img_input)
+# model = keras.Model(inputs=img_input, outputs=model_output, name="C_FCN")
+
+# C_UNETplusplus_model
 img_input = Input(shape=[input_height, input_width, 3])
-model_output = model_HairMatteNet(img_input)
-model = keras.Model(inputs=img_input, outputs=model_output, name="HairMatteNet")
+model_output = C_UNETplusplus_model(img_input)
+model = keras.Model(inputs=img_input, outputs=model_output, name="C_UNETplusplus")
 
 # # Unet
 # img_input = Input(shape=[input_width, input_height, 3])
@@ -75,6 +101,8 @@ model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])  # ['accuracy']
 
+
+
 history = model.fit(X_train, y_train,
           batch_size=batch_size,
           epochs=training_epochs,
@@ -86,8 +114,9 @@ history = model.fit(X_train, y_train,
 
 # Convert the model to tensorflow lite.
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
-tflite_reduced_model = converter.convert()
-open( 'tflite_HairMatteNet.tflite' , 'wb' ).write( tflite_model )
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+tflite_C_UNETplusplus = converter.convert()
+open( 'C_UNETplusplus.tflite' , 'wb' ).write( tflite_C_UNETplusplus )
 
 # Display results
 for i in range( X_test.shape[0]):

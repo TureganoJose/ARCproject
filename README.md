@@ -30,14 +30,39 @@ This was a rather interesting phase of the project. I implemented two different 
 1. Blue dot app: the RC car can be controlled using an android app which connects with the Raspberry pi via Bluetooth. You are limited to what you can do with this application. In order to start the car, you tap the blue dot. Once the dot has turned green, the car should start (sometimes you need to increase the PWM value depending on the battery charge) and you can steer moving your finger around the dot. Double-tap the blue dot and it will turn red, stopping the car and copying all the pictures taken to an USB.
 ![Blue dot app](Pictures/bluedotandroid_small.png)
 2. PS3 controller, a lot functionality. See picture below.
-![PS3 controls, Oxford](Pictures/PS3.png)
+![PS3 controls](Pictures/PS3.png)
+
+![Parallel processes](Pictures/Parallel.png)
+
 
 Software was developed in different environments (Ubuntu, Windows 10 and Raspbian). Prototyping was done in Python. All the embedded code for the car is C++. 
 Keras with Tensorflow backend to explore differents network architectures. OpenCV (C++ and Python) and Pillow for dealing with images/video. 
-Python 3.7
 
-gcc version 8.30
+For Python:
 
+| Package/Software        | version |
+|-------------------------|---------|
+| Python                  | 3.7     |
+| Keras                   | 2.3.1   |
+| Tensorflow              | 2.1     |
+| numpy                   | 1.18.4  |
+| OpenCV (built natively) | 4.3.0   |
+| Pillow                  | 7.1.2   |
+| imageio                 | 2.5.0   |
+| imgaug                  | 0.2.9   |
+| imgviz                  | 1.1.0   |
+| scikit-learn            | 0.23.0  |
+| bluedot                 | 1.3.2   |
+| pigpio                  | 1.46    |
+
+**IDEs**
+For Windows:
+Microsoft Visual Studio Express 2017 (Version 15.9.21)
+PyCharm 2019.2.3
+
+For Linux:
+Code::Blocks 17.12 (C++)
+Thonny 3.2.6 (Python)
 
 
 ## 4. Collecting data and labelling
@@ -50,7 +75,7 @@ Labelme (https://github.com/wkentaro/labelme/blob/master/README.md) was used to 
 ## 5. Training models
 Two different approaches:
 1. Dave-2 end-to-end driving. Everytime a picture was taken, the steering angle applied was logged. Then images (+ augmentation) was fed into the network along with the steering angles. The network then replicates the driving.
-Although impressive there is nothing innovative here, it's been done by many people See architecture below, it contains 250 thousand parameters.
+Although impressive there is nothing innovative here, it's been done by many people See architecture below, it contains 250 thousand parameters. I also tested quantization.
 
 ![Dave 2 Net](Pictures/Dave_2.png)
 2. Using semantic segmentation to detect the road/path and then steer the car accordingly, trying to keep the centerline of the vehicle aligned with the horizon.
@@ -59,8 +84,8 @@ Although impressive there is nothing innovative here, it's been done by many peo
 The raw pictures were resized to match the netwowrk and augmented with cropping, rotation and gaussian filters.
 
 
-3 different models were tested for the segmentation approach. 
-1. Vainilla Segmentation as specified in https://divamgupta.com/image-segmentation/2019/06/06/deep-learning-semantic-segmentation-keras.html. Only 400K parameters. Very simple and decent enough results but struggling a lot with some shadows, sky, rocks and sunshine.
+3 different models were tested for the segmentation approach (see below). Although there are plenty to explore (ie: https://awesomeopensource.com/project/mrgloom/awesome-semantic-segmentation), I ended up tweaking existing architectures to adjust the number of paramenters to bring down latency. 
+1. Vainilla Segmentation as specified in https://divamgupta.com/image-segmentation/2019/06/06/deep-learning-semantic-segmentation-keras.html. Only 400K parameters. Very simple and decent enough results but struggling a lot with some shadows, sky, rocks and sunshine. I added an extra layer in the encoder and decoder so now the number of filters go up to 256 with much better results (1.96 million parameters).
 
 
 ![Simple net for Segmentation](Pictures/Simple_Segmentation.png)
@@ -71,7 +96,7 @@ The raw pictures were resized to match the netwowrk and augmented with cropping,
 
 
 3. HairMatteNet (https://arxiv.org/pdf/1712.07168.pdf): As the name indicates, originally used to detect hairline. Lightweight segmentation based on MobileNet with a custom decoder (some skip connections and simplified reverse MobileNet). Best results so far, it contains around 3.8 million parameters but it doesn't mistake benches, sky and sun reflections as the park path. Only 3.8 million
-![Simple Segmentation](Pictures/HairMatteNet.png)
+![HairMatteNet](Pictures/HairMatteNet.png)
 
 
 Below there are some examples of challenging segmentation with dry patches on the grass, shoes, shadows and reflections. 
@@ -109,6 +134,7 @@ Lessons learned:
 Notes:
 - The code has been developed in different platforms, mostly Ubuntu, Raspbian and Windows 10. Apologies if folders don't work well.
 - The tutorials in qengineering.eu are very useful (ie: https://qengineering.eu/install-tensorflow-2-lite-on-raspberry-pi-4.html, although I figuered out how to soft link flatbuffers by myself)
+- Raspberry pi 4 can run up to 4 times slower when hot.
 
 PS3 controller instructions (for Raspberry pi 4):
 1. Download sixpair.c from http://pabr.org/sixlinux/sixlinux.en.html
@@ -123,3 +149,4 @@ PS3 controller instructions (for Raspberry pi 4):
 Open MP for Linux:
 1. Check your compiler version ```gcc --version```. Anything above 4.2 is compatible I believe.
 2. Add the flag ```-fopenmp``` and link to gomp library when compiling
+
