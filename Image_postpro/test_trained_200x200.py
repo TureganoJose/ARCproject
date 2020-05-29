@@ -121,7 +121,7 @@ def convert_to_png(img, a):
 
 
 # load model
-model = load_model('HairMatteNet.h5')
+model = load_model('HairMatteNet.h5') # C_UNETplusplus HairMatteNet
 
 # summarize model.
 # model.summary()
@@ -148,7 +148,12 @@ y_test = np.concatenate([arr[np.newaxis] for arr in y_test_list])
 #     display(image_list)
 
 # Plays video and runs segmentation
-cap = cv2.VideoCapture('D://Higher_cam_pos_Uni_Parks_3rd_test//flipped_testing_video_lowres.mp4')
+cap = cv2.VideoCapture('C://Workspaces//ARCproject//Pictures//flipped_testing_video_lowres.mp4')
+
+# Video writer
+fourcc = cv2.VideoWriter_fourcc(*'h264') # is a MP4 codec
+writer = cv2.VideoWriter('C://Workspaces//ARCproject//Pictures//segmentation_2.mp4', fourcc, 10, (input_height, input_width), 1)
+
 
 # Comparison with tensorflow lite done with a image rather than video
 # frame = cv2.imread("C://Workspaces\ARCproject//Image_postpro//Training folder//20200513-141759Tick82str-16.186993573536025.jpg")
@@ -161,34 +166,41 @@ cap = cv2.VideoCapture('D://Higher_cam_pos_Uni_Parks_3rd_test//flipped_testing_v
 while(cap.isOpened()):
     # Capture frame-by-frame
     ret, frame = cap.read()
-    new_frame = cv2.resize(frame, (input_width, input_height))
-    input_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2RGB)/255.0
-    cv2.imshow('Resized', new_frame)
-    y_pred = model.predict(input_frame[np.newaxis])
-    y_pred = y_pred.reshape((input_height, input_width,  2))
-    pred_mask = np.argmax(y_pred, axis=-1).reshape(input_height, input_width, 1)
+    if(ret):
+        new_frame = cv2.resize(frame, (input_width, input_height))
+        input_frame = cv2.cvtColor(new_frame, cv2.COLOR_BGR2RGB)/255.0
+        # cv2.imshow('Resized', new_frame)
+        y_pred = model.predict(input_frame[np.newaxis])
+        y_pred = y_pred.reshape((input_height, input_width,  2))
+        pred_mask = np.argmax(y_pred, axis=-1).reshape(input_height, input_width, 1)
 
-    # Sum all the columns in the mask to find out where the horizon seen by the camera is
-    max_value = np.amax(np.sum(pred_mask[:, :, 0], axis=0))
-    # Find what columns contain that value. The relative position of this column to the central one is how much you need to steer
-    max_index = np.where(np.sum(pred_mask[:, :, 0], axis=0)==max_value)
-    mean_max_index = int(round(np.mean(max_index)))
+        # Sum all the columns in the mask to find out where the horizon seen by the camera is
+        max_value = np.amax(np.sum(pred_mask[:, :, 0], axis=0))
+        # Find what columns contain that value. The relative position of this column to the central one is how much you need to steer
+        max_index = np.where(np.sum(pred_mask[:, :, 0], axis=0)==max_value)
+        mean_max_index = int(round(np.mean(max_index)))
 
-    pred_mask = np.append(pred_mask * 255 , np.ones((input_width, input_height,1)) * 0, axis=2 )
-    pred_mask = np.append(pred_mask, np.ones((input_width, input_height, 1)) * 0, axis=2)
+        pred_mask = np.append(pred_mask * 255 , np.ones((input_width, input_height,1)) * 0, axis=2 )
+        pred_mask = np.append(pred_mask, np.ones((input_width, input_height, 1)) * 0, axis=2)
 
-    # Central vertical black line as reference (in black)
-    pred_mask[int(0.25*input_height):int(0.75*input_height), int(input_width/2), 0] = 255
-    pred_mask[int(0.25*input_height):int(0.75*input_height), int(input_width/2), 1] = 255
-    pred_mask[int(0.25*input_height):int(0.75*input_height), int(input_width/2), 2] = 255
+        # Central vertical black line as reference (in black)
+        pred_mask[int(0.25*input_height):int(0.75*input_height), int(input_width/2), 0] = 255
+        pred_mask[int(0.25*input_height):int(0.75*input_height), int(input_width/2), 1] = 255
+        pred_mask[int(0.25*input_height):int(0.75*input_height), int(input_width/2), 2] = 255
 
-    # Plot the position of the pixel column with more path detected
-    pred_mask[int(0.1*input_height):int(0.9*input_height), mean_max_index, 0] = 0
-    pred_mask[int(0.1*input_height):int(0.9*input_height), mean_max_index, 1] = 255
-    pred_mask[int(0.1*input_height):int(0.9*input_height), mean_max_index, 2] = 0
+        # Plot the position of the pixel column with more path detected
+        pred_mask[int(0.1*input_height):int(0.9*input_height), mean_max_index, 0] = 0
+        pred_mask[int(0.1*input_height):int(0.9*input_height), mean_max_index, 1] = 255
+        pred_mask[int(0.1*input_height):int(0.9*input_height), mean_max_index, 2] = 0
 
-    output = ((0.6 * new_frame) + (0.4 * pred_mask)).astype("uint8")
-    # cv2.imshow('Mask', output)
-    plt.imshow(output)
-    plt.show()
+        output = ((0.6 * new_frame) + (0.4 * pred_mask)).astype("uint8")
+        writer.write(output)
+    else:
+        break
+        # cv2.imshow('Mask', output)
+        # time.sleep(0.01)
+        #plt.imshow(output)
+        #plt.show()
 
+cap.release()
+writer.release()

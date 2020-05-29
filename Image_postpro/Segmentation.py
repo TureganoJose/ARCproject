@@ -110,13 +110,13 @@ history = model.fit(X_train, y_train,
           validation_data=(X_test, y_test))
 
 # Save model
-# model.save('HairMatteNet.h5') # Saved in Keras
+model.save('C_UNETplusplus.h5') # Saved in Keras
 
 # Convert the model to tensorflow lite.
 converter = tf.lite.TFLiteConverter.from_keras_model(model)
 converter.optimizations = [tf.lite.Optimize.DEFAULT]
-tflite_C_UNETplusplus = converter.convert()
-open( 'C_UNETplusplus.tflite' , 'wb' ).write( tflite_C_UNETplusplus )
+C_UNETplusplus_q = converter.convert()
+open('C_UNETplusplus_q.tflite' , 'wb').write(C_UNETplusplus_q)
 
 # Display results
 for i in range( X_test.shape[0]):

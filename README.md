@@ -28,7 +28,11 @@ Note that the receiver feeds the servo hence the red cables go into the receiver
 ## 3. Controls and software
 This was a rather interesting phase of the project. I implemented two different ways of controlling the car:
 1. Blue dot app: the RC car can be controlled using an android app which connects with the Raspberry pi via Bluetooth. You are limited to what you can do with this application. In order to start the car, you tap the blue dot. Once the dot has turned green, the car should start (sometimes you need to increase the PWM value depending on the battery charge) and you can steer moving your finger around the dot. Double-tap the blue dot and it will turn red, stopping the car and copying all the pictures taken to an USB.
+
+
 ![Blue dot app](Pictures/bluedotandroid_small.png)
+
+
 2. PS3 controller, a lot functionality. See picture below.
 ![PS3 controls](Pictures/PS3.png)
 
@@ -67,21 +71,25 @@ Thonny 3.2.6 (Python)
 
 ## 4. Collecting data and labelling
 All pictures and videos were taken different times of the day with different light conditions at University Parks in Oxford.
+
+
 ![University Parks, Oxford](Pictures/Uni_parks.png)
+
+
 The raw pictures were taken at 1024x768. Due to limitations with SD writing speeds, only 11 pictures are taken per second.
 The camera was placed in different places, mostly looking forward at different heights.
-Labelme (https://github.com/wkentaro/labelme/blob/master/README.md) was used to label the pictures manually.
+Labelme (https://github.com/wkentaro/labelme/blob/master/README.md) was used to label around 200 pictures manually.
 
 ## 5. Training models
 Two different approaches:
 1. Dave-2 end-to-end driving. Everytime a picture was taken, the steering angle applied was logged. Then images (+ augmentation) was fed into the network along with the steering angles. The network then replicates the driving.
-Although impressive there is nothing innovative here, it's been done by many people See architecture below, it contains 250 thousand parameters. I also tested quantization.
+Although impressive there is nothing innovative here, imitation learning has been done by many people See architecture below, it contains 250 thousand parameters. I also tested quantization.
 
 ![Dave 2 Net](Pictures/Dave_2.png)
 2. Using semantic segmentation to detect the road/path and then steer the car accordingly, trying to keep the centerline of the vehicle aligned with the horizon.
 
 
-The raw pictures were resized to match the netwowrk and augmented with cropping, rotation and gaussian filters.
+The raw pictures were resized to match the netwowrk and augmented randomly with cropping, rotation and gaussian filters.
 
 
 3 different models were tested for the segmentation approach (see below). Although there are plenty to explore (ie: https://awesomeopensource.com/project/mrgloom/awesome-semantic-segmentation), I ended up tweaking existing architectures to adjust the number of paramenters to bring down latency. 
@@ -125,16 +133,18 @@ Lessons learned:
 - Got a clearer picture of motors and how they are controlled. For this project, it has been mostly through a ESC (Electronic Speed Controller driven by PWM, sue me I don't have a real-time machine, or the budget for it) but also created my own circuit on a breadbord with a L293D. 
 - How computationally limited a RPi is, as of today, an NVidia Jetson sounds like the only plausible option beyond a simple end-to-end driving with a CNN.There is also limitations due to camera bandwitdth and memory.
 - Overcoming the (computational) limitations of RPI has proved to be a challenge. Now I have a better understanding of multithreadidng (race conditions, inter-locking) in both environments, Python and C++(OpenMP, good resource: https://csinparallel.org/csinparallel/ppps/openmp.html ).
-- Project management, how quickly (and easily) the budget can escalate. I've suffered myself planning fallacy as described in "Thinking, fast and slow" from Daniel Kahneman. The bottom line is Don't let optimism bias take over, based estimations on data. In this case the timeframe was half a year, it took over a year. Regarding the cost, the inital budget was around 300 pounds. It just went over 500.
+- Project management, how quickly (and easily) the budget can escalate. I've suffered myself planning fallacy as described in "Thinking, fast and slow" by Daniel Kahneman. The bottom line is Don't let optimism bias take over, based estimations on data. In this case the timeframe was half a year, it took over a year. Regarding the cost, the inital budget was around 300 pounds. It just went over 500.
 - Coding: definitely helped to improve my coding skills, I do have a better knowledge of python and how to optimise the code to handle large memory chunks. I'm a C++ guy tho. 
 - I've gained some fluency on OpenCV to manipulate images/video and definitely I'm getting better with Keras although I think everyone taking ML seriously should know how to write a neural network framework (to implement custom layers at least)... but that can be found in a different repository.
-- Semantic segementation and implementation of more complex architectures 
+- Semantic segementation and implementation of more complex architectures. Experimenting with the different layers and parameters of CNNs.
 
 
 Notes:
 - The code has been developed in different platforms, mostly Ubuntu, Raspbian and Windows 10. Apologies if folders don't work well.
 - The tutorials in qengineering.eu are very useful (ie: https://qengineering.eu/install-tensorflow-2-lite-on-raspberry-pi-4.html, although I figuered out how to soft link flatbuffers by myself)
 - Raspberry pi 4 can run up to 4 times slower when hot.
+- Tempted to overclock the raspberry pi but I'm using a powerbank for mobiles to supply the 5V needed.
+
 
 PS3 controller instructions (for Raspberry pi 4):
 1. Download sixpair.c from http://pabr.org/sixlinux/sixlinux.en.html
