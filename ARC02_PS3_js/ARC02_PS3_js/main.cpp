@@ -42,7 +42,7 @@ else
     printf("Camera is open \n");
 }
 
-VideoWriter video("testing_video_lowres.mkv",VideoWriter::fourcc('H','2','6','4'),10, Size(1024, 768));
+//VideoWriter video("testing_video_lowres.mkv",VideoWriter::fourcc('H','2','6','4'),10, Size(1024, 768));
 
 // Create an instance of Joystick
 Joystick joystick("/dev/input/js1");
@@ -169,17 +169,17 @@ Mat frame;
              struct tm * timeinfo;
              char buffer[80];
 
-             //time (&rawtime);
-             //timeinfo = localtime(&rawtime);
-             //strftime(buffer,sizeof(buffer),"%Y%m%d_%H%M%S",timeinfo);
-             //std::string ctr_str = std::to_string(icounter);
-             //std::string date_str(buffer);
-             //std::string steering_str = std::to_string(steering);
-             //result = imwrite(date_str+"Tick"+ctr_str+"str"+steering_str+".jpg", frame);
+             time (&rawtime);
+             timeinfo = localtime(&rawtime);
+             strftime(buffer,sizeof(buffer),"%Y%m%d_%H%M%S",timeinfo);
+             std::string ctr_str = std::to_string(icounter);
+             std::string date_str(buffer);
+             std::string steering_str = std::to_string(steering);
+             result = imwrite(date_str+"Tick"+ctr_str+"str"+steering_str+".jpg", frame);
 
                // writes video
-               video.write(frame);
-               result = 1;
+               //video.write(frame);
+               //result = 1;
 
          }
          catch (const cv::Exception& ex)
@@ -205,7 +205,7 @@ if(event.number==0 && event.value==1)
     gpioServo(ESC_gpio, 0.0);
     gpioServo(servo_gpio, 0.0);
     cap.release();
-    video.release();
+    //video.release();
     printf("Bye! \n");
     //return 0;
 }
