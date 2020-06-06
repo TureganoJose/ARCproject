@@ -229,7 +229,21 @@ int main()
         //printf("max column %d \n",max_loc[1]);
         //printf("max value %f \n",max_value);
 
-        double K_d = 1.0 * (max_loc[1]-112)/101;
+        // Find indeces of max_value and then calculate mean.
+        int counter = 0;
+        int index_sum = 0;
+        for(uint16_t i=0; i<224*2;i++) // old style, no iterator
+        {
+            if(mask_image_summed.at<int16_t>(i)==(int16_t)max_value)
+            {
+                index_sum += (i)/2;
+                counter += 1;
+            }
+        }
+
+        int averaged_max_column = (int)(index_sum/counter);
+
+        double K_d = 0.3 * (averaged_max_column-112)/101;
         K_d = min(K_d,  1.0);
         K_d = max(K_d, -1.0);
         steering = zero_value + half_range * K_d;
