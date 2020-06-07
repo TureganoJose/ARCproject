@@ -9,28 +9,58 @@
 
 ## Folder structure and contents
 
-.
-├── ARC01_keyboard_control          # Sandbox with python scripts to experiment with things like Bluedot app, opencv, pi camera, controls
-│   ├── Control_and_data_logging.py          # Drives RC car with Bluedot app and in parallel it takes picturs and logs steering angle.
-│   ├── Drive_steer_motors.py                # First script to test motors
-│   ├── bluedot_test.py                      # Bluedot with motors test
-│   ├── camera_test.py          			 # Benchmarking writing speeds for the images captured
-│   └── opencv_test.py              		 # OpenCV test after build
-├── ARC02_PS3_js                    # C++ project to control ARC02 (RC car) with PS3 and at the same time capture images and log steering angle.
-├── ARC02_inference                 # Most important code: Embeded C++ project code in RPi. It captures the image, runs the semantic segmentation and steers the vehicle autonomously
-├── Image_postpro                   # All python script post-processing images and it contains the definition of the CNN models.
-│   ├── Training folder             		# Contains original image, json and png with labels.
-│   ├── Dave_2_net.py                		# Good old Dave-2: imitation learning. Cool to implement this one after reading the book about DARPA challenge.
-│   ├── Image_post_pro.py                   # Flip images and save it in the right format. 
-│   ├── Segementation_utils.py          	# Augmentation, pre-process images (rotations) before being fed to CNN and some plotting functions 
-│   ├── Segmentation.py          			# Main script to train networks. A bit of sandbox with different models commented out.
-│   ├── Segmentation_models.py          	# Definition of all the segmentation models
-│   └── test_trained_200x200.py             # Script to test models
-├── OpenCV_PiCamera                 # Sandbox with some opencv c++ code to treat images
-├── PS3_controller                  # Basic c++ project to control the car with PS3.
-├── Pictures                        # It contains all pics and gifs
-├── Tensorflow_lite_inference_test  # C++ project to benchmark tensorflow lite in RPi
+
+
+├── ARC01_keyboard_control              
+│       ├── Control_and_data_logging.py 
+│       ├── Drive_steer_motors.py       
+│       ├── bluedot_test.py             
+│       ├── camera_test.py          	
+│       └── opencv_test.py              
+├── ARC02_PS3_js                        
+├── ARC02_inference                     
+├── Image_postpro                       
+│       ├── Training folder             
+│       ├── Dave_2_net.py               
+│       ├── Image_post_pro.py           
+│       ├── Segementation_utils.py      
+│       ├── Segmentation.py             
+│       ├── Segmentation_models.py      
+│       └── test_trained_200x200.py     
+├── OpenCV_PiCamera                     
+├── PS3_controller                      
+├── Pictures                            
+├── Tensorflow_lite_inference_test      
 └── README.md
+
+
+
+
+There is a lot of experimentation. Feel free to use the code but it hasn't been created for release. You might find useful bits of code.
+
+
+
+* ARC01_keyboard_control -> Sandbox with python scripts to experiment with things like Bluedot app, opencv, pi camera, controls
+  * Control_and_data_logging.py -> Drives RC car with Bluedot app and in parallel it takes picturs and logs steering angle.
+  * Drive_steer_motors.py -> First script to test motors
+  * bluedot_test.py -> Bluedot with motors test
+  * camera_test.py  -> Benchmarking writing speeds for the images captured
+  * opencv_test.py -> OpenCV test after build
+* ARC02_PS3_js -> C++ project to control ARC02 (RC car) with PS3 and at the same time capture images and log steering angle.
+* ARC02_inference -> Most important code: Embeded C++ project code in RPi. It captures the image, runs the semantic segmentation and steers the vehicle autonomously
+* Image_postpro -> All python script post-processing images and it contains the definition of the CNN models.
+  * Training folder -> Contains original image, json and png with labels.
+  * Dave_2_net.py -> Good old Dave-2: imitation learning. Cool to implement this one after reading the book about DARPA challenge.
+  * Image_post_pro.py -> Flip images and save it in the right format. 
+  * Segementation_utils.py  -> Augmentation, pre-process images (rotations) before being fed to CNN and some plotting functions 
+  * Segmentation.py -> Main script to train networks. A bit of sandbox with different models commented out.
+  * Segmentation_models.py  -> Definition of all the segmentation models
+  * test_trained_200x200.py -> Script to test models
+* OpenCV_PiCamera -> Sandbox with some opencv c++ code to treat images
+* PS3_controller -> Basic c++ project to control the car with PS3.
+* Pictures -> It contains all pics and gifs
+* Tensorflow_lite_inference_test -> C++ project to benchmark tensorflow lite in RPi
+* README.md
 
 
 The project has 5 distinctive parts:
@@ -231,7 +261,7 @@ Below there are some examples of challenging segmentation with dry patches on th
 
 ## 6. Embedded software
 
-All the useful embeded software is in folder '''ARC02_inference'''.
+All the useful embeded software is in folder ```ARC02_inference``` .
 
 
 
